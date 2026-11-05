@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [" I ", "ICI", " R "],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "C": "minecraft:compass",
+    "R": "minecraft:redstone"
+  },
+  "result": { "id": "oreexcavationfly:vein_finder" }
+}

@@ -18,6 +18,10 @@ jobs:
           distribution: temurin
           java-version: 25
       - uses: gradle/actions/setup-gradle@v4
+      - name: Probe Mod Menu and Cloth Config versions
+        run: |
+          curl -s https://maven.terraformersmc.com/releases/com/terraformersmc/modmenu/maven-metadata.xml | grep -E "<version>" | tail -8 || true
+          curl -s https://maven.shedaniel.me/me/shedaniel/cloth/cloth-config-fabric/maven-metadata.xml | grep -E "<version>" | tail -5 || true
       - name: Build Create Fly from source
         run: |
           git init /tmp/create-fly
