@@ -20,6 +20,7 @@ public final class ModBlocks {
 
     public static DrillBlock DRILL;
     public static BlockEntityType<DrillBlockEntity> DRILL_BE;
+    public static Item VEIN_FINDER;
 
     private static Identifier id(String path) {
         return Identifier.fromNamespaceAndPath(OreExcavationFly.MOD_ID, path);
@@ -35,6 +36,11 @@ public final class ModBlocks {
         Registry.register(
             BuiltInRegistries.ITEM, itemKey,
             new BlockItem(DRILL, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix())
+        );
+        ResourceKey<Item> finderKey = ResourceKey.create(Registries.ITEM, id("vein_finder"));
+        VEIN_FINDER = Registry.register(
+            BuiltInRegistries.ITEM, finderKey,
+            new VeinFinderItem(new Item.Properties().setId(finderKey).stacksTo(1))
         );
         DRILL_BE = Registry.register(
             BuiltInRegistries.BLOCK_ENTITY_TYPE, id("drill"),

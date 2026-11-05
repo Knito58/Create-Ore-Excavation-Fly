@@ -7,5 +7,20 @@
   "vein.oreexcavationfly.redstone": "Redstone Vein",
   "vein.oreexcavationfly.lapis": "Lapis Vein",
   "vein.oreexcavationfly.diamond": "Diamond Vein",
-  "vein.oreexcavationfly.emerald": "Emerald Vein"
+  "vein.oreexcavationfly.emerald": "Emerald Vein",
+  "item.oreexcavationfly.vein_finder": "Ore Vein Finder",
+  "message.oreexcavationfly.finder.nothing": "No ore signal in range",
+  "message.oreexcavationfly.finder.here": "%s right below you",
+  "message.oreexcavationfly.finder.exact": "%s in chunk %s, %s (%s)",
+  "message.oreexcavationfly.finder.type": "%s to the %s",
+  "message.oreexcavationfly.finder.signal.medium": "Signal getting clearer to the %s",
+  "message.oreexcavationfly.finder.signal.weak": "Faint signal to the %s",
+  "direction.oreexcavationfly.east": "east",
+  "direction.oreexcavationfly.south_east": "south-east",
+  "direction.oreexcavationfly.south": "south",
+  "direction.oreexcavationfly.south_west": "south-west",
+  "direction.oreexcavationfly.west": "west",
+  "direction.oreexcavationfly.north_west": "north-west",
+  "direction.oreexcavationfly.north": "north",
+  "direction.oreexcavationfly.north_east": "north-east"
 }
