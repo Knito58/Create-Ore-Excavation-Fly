@@ -16,20 +16,28 @@ import snownee.jade.api.config.IPluginConfig;
 public class JadeIntegration implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration registration) {
+        OreExcavationFly.LOGGER.info("Jade plugin: registering server data provider");
         registration.registerBlockDataProvider(DrillProvider.INSTANCE, DrillBlockEntity.class);
     }
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
+        OreExcavationFly.LOGGER.info("Jade plugin: registering drill tooltip");
         registration.registerBlockComponent(DrillProvider.INSTANCE, DrillBlock.class);
     }
 
     public enum DrillProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
         INSTANCE;
 
+        private boolean loggedOnce;
+
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
             CompoundTag data = accessor.getServerData();
+            if (!loggedOnce) {
+                loggedOnce = true;
+                OreExcavationFly.LOGGER.info("Jade plugin: drill tooltip called, server data keys: {}", data.keySet());
+            }
             if (!data.contains("vein")) {
                 tooltip.add(Component.translatable("jade.oreexcavationfly.no_vein"));
                 return;
