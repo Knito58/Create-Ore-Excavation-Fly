@@ -1,5 +1,6 @@
 package io.github.knito58.oreexcavationfly;
 
+import com.zurrtum.create.AllTransfer;
 import com.zurrtum.create.content.kinetics.base.KineticBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -46,7 +47,9 @@ public class DrillBlockEntity extends KineticBlockEntity {
     private ItemStack output(ServerLevel server, ItemStack stack) {
         Direction front = getBlockState().getValue(DrillBlock.FACING);
         BlockPos target = worldPosition.relative(front);
-        Container inv = HopperBlockEntity.getContainerAt(server, target);
+        // Create Fly's transfer wrapper first (vaults, barrels, chests, ...), vanilla containers as fallback.
+        Container inv = AllTransfer.getInventory(server, target, null, null, front.getOpposite());
+        if (inv == null) inv = HopperBlockEntity.getContainerAt(server, target);
         if (inv != null) {
             return HopperBlockEntity.addItem(null, inv, stack, front.getOpposite());
         }
