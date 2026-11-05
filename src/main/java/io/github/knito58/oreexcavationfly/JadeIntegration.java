@@ -12,32 +12,55 @@ import snownee.jade.api.IWailaCommonRegistration;
 import snownee.jade.api.IWailaPlugin;
 import snownee.jade.api.config.IPluginConfig;
 
-/** Jade tooltip for the drill: vein, speed, time per item and progress. Only loaded when Jade is present. */
+/**
+ * Jade tooltip for the drill: vein, speed, time per item and progress. Only loaded when Jade is present.
+ * Since Minecraft 1.21.6 Jade wants the server data provider and the client tooltip provider as separate classes
+ * (sharing one uid so the client asks the server for the data).
+ */
 public class JadeIntegration implements IWailaPlugin {
+    private static final Identifier UID = Identifier.fromNamespaceAndPath(OreExcavationFly.MOD_ID, "drill");
+
     @Override
     public void register(IWailaCommonRegistration registration) {
-        OreExcavationFly.LOGGER.info("Jade plugin: registering server data provider");
-        registration.registerBlockDataProvider(DrillProvider.INSTANCE, DrillBlockEntity.class);
+        registration.registerBlockDataProvider(DrillData.INSTANCE, DrillBlockEntity.class);
     }
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
-        OreExcavationFly.LOGGER.info("Jade plugin: registering drill tooltip");
-        registration.registerBlockComponent(DrillProvider.INSTANCE, DrillBlock.class);
+        registration.registerBlockComponent(DrillTooltip.INSTANCE, DrillBlock.class);
     }
 
-    public enum DrillProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
+    /** Server side: collects the values the tooltip shows. */
+    public enum DrillData implements IServerDataProvider<BlockAccessor> {
         INSTANCE;
 
-        private boolean loggedOnce;
+        @Override
+        public void appendServerData(CompoundTag data, BlockAccessor accessor) {
+            if (!(accessor.getBlockEntity() instanceof DrillBlockEntity drill)) return;
+            Veins.Vein vein = drill.veinHere();
+            if (vein == null) return;
+            float rpm = drill.rpm();
+            data.putString("vein", vein.id());
+            data.putFloat("rpm", rpm);
+            data.putBoolean("stalled", drill.isStalled());
+            data.putFloat("progress", drill.progressFraction());
+            // ticks per item = ticksAt32 * 32 / rpm; 20 ticks per second
+            data.putFloat("seconds", rpm > 0 ? vein.ticksAt32() * 32f / rpm / 20f : 0f);
+        }
+
+        @Override
+        public Identifier getUid() {
+            return UID;
+        }
+    }
+
+    /** Client side: draws the tooltip. */
+    public enum DrillTooltip implements IBlockComponentProvider {
+        INSTANCE;
 
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
             CompoundTag data = accessor.getServerData();
-            if (!loggedOnce) {
-                loggedOnce = true;
-                OreExcavationFly.LOGGER.info("Jade plugin: drill tooltip called, server data keys: {}", data.keySet());
-            }
             if (!data.contains("vein")) {
                 tooltip.add(Component.translatable("jade.oreexcavationfly.no_vein"));
                 return;
@@ -59,22 +82,8 @@ public class JadeIntegration implements IWailaPlugin {
         }
 
         @Override
-        public void appendServerData(CompoundTag data, BlockAccessor accessor) {
-            if (!(accessor.getBlockEntity() instanceof DrillBlockEntity drill)) return;
-            Veins.Vein vein = drill.veinHere();
-            if (vein == null) return;
-            float rpm = drill.rpm();
-            data.putString("vein", vein.id());
-            data.putFloat("rpm", rpm);
-            data.putBoolean("stalled", drill.isStalled());
-            data.putFloat("progress", drill.progressFraction());
-            // ticks per item = ticksAt32 * 32 / rpm; 20 ticks per second
-            data.putFloat("seconds", rpm > 0 ? vein.ticksAt32() * 32f / rpm / 20f : 0f);
-        }
-
-        @Override
         public Identifier getUid() {
-            return Identifier.fromNamespaceAndPath(OreExcavationFly.MOD_ID, "drill");
+            return UID;
         }
     }
 }
