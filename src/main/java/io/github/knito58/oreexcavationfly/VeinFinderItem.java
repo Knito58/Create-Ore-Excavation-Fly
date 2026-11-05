@@ -87,6 +87,6 @@ public class VeinFinderItem extends Item {
     }
 
     private static void send(Player player, Component message) {
-        player.displayClientMessage(message, true);
+        player.sendOverlayMessage(message);
     }
 }
