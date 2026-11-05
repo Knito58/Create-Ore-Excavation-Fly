@@ -10,6 +10,7 @@ public class OreExcavationFly implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        Config.load();
         LOGGER.info("Create: Ore Excavation Fly loaded");
     }
 }
