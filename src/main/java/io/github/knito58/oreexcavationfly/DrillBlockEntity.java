@@ -43,6 +43,27 @@ public class DrillBlockEntity extends KineticBlockEntity {
         pending = output(server, new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.parse(vein.item()))));
     }
 
+    /** The vein in this drill's chunk, or null (server side only). */
+    public Veins.Vein veinHere() {
+        if (!(level instanceof ServerLevel server)) return null;
+        return Veins.at(server.getSeed(), worldPosition.getX() >> 4, worldPosition.getZ() >> 4);
+    }
+
+    /** Current speed in RPM (absolute). */
+    public float rpm() {
+        return Math.abs(speed);
+    }
+
+    public boolean isStalled() {
+        return !pending.isEmpty();
+    }
+
+    /** Progress to the next item, 0..1. */
+    public float progressFraction() {
+        Veins.Vein v = veinHere();
+        return v == null ? 0f : Math.min(1f, progress / (v.ticksAt32() * 32f));
+    }
+
     /** Inserts into the inventory in front if there is one, else drops the item. Returns what is left over. */
     private ItemStack output(ServerLevel server, ItemStack stack) {
         Direction front = getBlockState().getValue(DrillBlock.FACING);

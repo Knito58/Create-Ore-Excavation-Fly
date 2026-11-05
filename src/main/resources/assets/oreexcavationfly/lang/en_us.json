@@ -32,5 +32,12 @@
   "config.oreexcavationfly.finderRangeChunks": "Finder range (chunks)",
   "config.oreexcavationfly.finderTypeRangeChunks": "Vein type is shown within (chunks)",
   "config.oreexcavationfly.finderExactRangeChunks": "Exact chunk is shown within (chunks)",
-  "config.oreexcavationfly.finderCooldownTicks": "Finder cooldown (ticks)"
+  "config.oreexcavationfly.finderCooldownTicks": "Finder cooldown (ticks)",
+  "jade.oreexcavationfly.no_vein": "No vein here",
+  "jade.oreexcavationfly.vein": "Mining: %s",
+  "jade.oreexcavationfly.speed": "Speed: %s RPM",
+  "jade.oreexcavationfly.rate": "One item every %s s",
+  "jade.oreexcavationfly.progress": "Progress: %s%%",
+  "jade.oreexcavationfly.full": "Output full",
+  "jade.oreexcavationfly.idle": "Not rotating"
 }
