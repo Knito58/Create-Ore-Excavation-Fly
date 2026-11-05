@@ -41,6 +41,13 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew build --stacktrace
+      - name: Inspect Jade jar (plugin discovery)
+        run: |
+          J=$(find ~/.gradle -name 'jade-*.jar' ! -name '*sources*' | head -n1); echo "JAR=$J"
+          unzip -p "$J" fabric.mod.json | head -c 2500 || true
+          echo; unzip -l "$J" | grep -i -E "WailaPlugin|IWailaPlugin|PluginLoader|JadeFabric|fabric" | head -20 || true
+          javap -cp "$J" snownee.jade.api.IWailaPlugin || true
+          javap -cp "$J" -v snownee.jade.api.WailaPlugin 2>/dev/null | head -20 || true
       - uses: actions/upload-artifact@v4
         with:
           name: create-ore-excavation-fly
