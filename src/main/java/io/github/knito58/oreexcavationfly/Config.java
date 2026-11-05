@@ -17,14 +17,6 @@ import java.nio.file.Path;
 public class Config {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    // --- veins ---
-    /** Base amount for finite veins (multiplied by each vein's amount multiplier). */
-    public int finiteAmountBase = 1000;
-    /** Veins are infinite unless a vein says otherwise. */
-    public boolean defaultInfinite = true;
-    /** Max drills per vein, 0 = unlimited. */
-    public int maxDrillsPerVein = 0;
-
     // --- vein finder (prospecting radar) ---
     /** Maximum scan range in chunks. */
     public int finderRangeChunks = 16;
@@ -36,8 +28,6 @@ public class Config {
     public int finderCooldownTicks = 100;
 
     private void clamp() {
-        finiteAmountBase = Math.max(1, finiteAmountBase);
-        maxDrillsPerVein = Math.max(0, Math.min(64, maxDrillsPerVein));
         finderRangeChunks = Math.max(1, Math.min(64, finderRangeChunks));
         finderTypeRangeChunks = Math.max(1, Math.min(finderRangeChunks, finderTypeRangeChunks));
         finderExactRangeChunks = Math.max(0, Math.min(finderTypeRangeChunks, finderExactRangeChunks));
