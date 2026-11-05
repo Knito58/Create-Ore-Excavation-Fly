@@ -69,7 +69,7 @@ public class VeinFinderItem extends Item {
     }
 
     private static Component vein(Veins.Located l) {
-        return Component.translatable("vein.oreexcavationfly." + l.vein().id());
+        return l.vein().displayName();
     }
 
     /** Compass direction with a fixed per-vein error that grows with distance. */

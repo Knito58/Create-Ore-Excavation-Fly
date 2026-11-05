@@ -41,6 +41,7 @@ public class JadeIntegration implements IWailaPlugin {
             if (vein == null) return;
             float rpm = drill.rpm();
             data.putString("vein", vein.id());
+            if (vein.name() != null) data.putString("veinName", vein.name());
             data.putFloat("rpm", rpm);
             data.putBoolean("stalled", drill.isStalled());
             data.putFloat("progress", drill.progressFraction());
@@ -65,8 +66,11 @@ public class JadeIntegration implements IWailaPlugin {
                 tooltip.add(Component.translatable("jade.oreexcavationfly.no_vein"));
                 return;
             }
-            tooltip.add(Component.translatable("jade.oreexcavationfly.vein",
-                Component.translatable("vein.oreexcavationfly." + data.getStringOr("vein", ""))));
+            String customName = data.getStringOr("veinName", "");
+            Component veinName = customName.isBlank()
+                ? Component.translatable("vein.oreexcavationfly." + data.getStringOr("vein", ""))
+                : Component.literal(customName);
+            tooltip.add(Component.translatable("jade.oreexcavationfly.vein", veinName));
             float rpm = data.getFloatOr("rpm", 0f);
             tooltip.add(Component.translatable("jade.oreexcavationfly.speed", Math.round(rpm)));
             if (data.getBooleanOr("stalled", false)) {

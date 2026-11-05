@@ -1,7 +1,19 @@
 package io.github.knito58.oreexcavationfly;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.network.chat.Component;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Stream;
 
 /**
  * Deterministic vein placement. A vein is a whole chunk. The world is divided into cells of
@@ -17,23 +29,86 @@ public final class Veins {
     public static final float CELL_CHANCE = 0.7f;
 
     /**
-     * @param id        short id, also used in the lang key "vein.oreexcavationfly.<id>"
+     * One vein type. Loaded from config/oreexcavationfly/veins/*.json.
+     *
+     * @param id        short unique id
+     * @param name      optional display name; if empty the lang key "vein.oreexcavationfly.<id>" is used
      * @param item      registry id of the item the drill produces
      * @param weight    relative chance to be picked
      * @param ticksAt32 ticks per item at 32 RPM
      */
-    public record Vein(String id, String item, int weight, int ticksAt32) {}
+    public record Vein(String id, String name, String item, int weight, int ticksAt32) {
+        public Component displayName() {
+            return name != null && !name.isBlank() ? Component.literal(name) : Component.translatable("vein.oreexcavationfly." + id);
+        }
+    }
 
-    public static final List<Vein> ALL = List.of(
-        new Vein("iron", "minecraft:raw_iron", 30, 100),
-        new Vein("copper", "minecraft:raw_copper", 30, 80),
-        new Vein("gold", "minecraft:raw_gold", 12, 140),
-        new Vein("coal", "minecraft:coal", 30, 60),
-        new Vein("redstone", "minecraft:redstone", 14, 100),
-        new Vein("lapis", "minecraft:lapis_lazuli", 10, 100),
-        new Vein("diamond", "minecraft:diamond", 4, 400),
-        new Vein("emerald", "minecraft:emerald", 3, 400)
-    );
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+
+    private static List<Vein> defaults() {
+        return List.of(
+            new Vein("iron", null, "minecraft:raw_iron", 30, 100),
+            new Vein("copper", null, "minecraft:raw_copper", 30, 80),
+            new Vein("gold", null, "minecraft:raw_gold", 12, 140),
+            new Vein("coal", null, "minecraft:coal", 30, 60),
+            new Vein("redstone", null, "minecraft:redstone", 14, 100),
+            new Vein("lapis", null, "minecraft:lapis_lazuli", 10, 100),
+            new Vein("diamond", null, "minecraft:diamond", 4, 400),
+            new Vein("emerald", null, "minecraft:emerald", 3, 400)
+        );
+    }
+
+    /** The active vein list. Replaced by {@link #load()}. */
+    public static volatile List<Vein> ALL = defaults();
+
+    private static Path dir() {
+        return FabricLoader.getInstance().getConfigDir().resolve(OreExcavationFly.MOD_ID).resolve("veins");
+    }
+
+    /** Reads the vein files; writes the default files first if the folder does not exist yet. */
+    public static void load() {
+        Path dir = dir();
+        try {
+            if (!Files.isDirectory(dir)) {
+                Files.createDirectories(dir);
+                for (Vein v : defaults()) {
+                    try (Writer w = Files.newBufferedWriter(dir.resolve(v.id() + ".json"))) {
+                        GSON.toJson(v, w);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            OreExcavationFly.LOGGER.warn("Could not create default vein files in {}", dir, e);
+            return;
+        }
+        List<Vein> loaded = new ArrayList<>();
+        try (Stream<Path> files = Files.list(dir)) {
+            files.filter(f -> f.toString().endsWith(".json")).sorted().forEach(f -> {
+                try (Reader r = Files.newBufferedReader(f)) {
+                    Vein v = GSON.fromJson(r, Vein.class);
+                    if (v == null || v.id() == null || v.item() == null) {
+                        OreExcavationFly.LOGGER.warn("Skipping {}: needs at least id and item", f.getFileName());
+                    } else if (v.weight() <= 0 || v.ticksAt32() <= 0) {
+                        OreExcavationFly.LOGGER.warn("Skipping {}: weight and ticksAt32 must be above 0", f.getFileName());
+                    } else {
+                        loaded.add(v);
+                    }
+                } catch (Exception e) {
+                    OreExcavationFly.LOGGER.warn("Skipping {}: {}", f.getFileName(), e.toString());
+                }
+            });
+        } catch (IOException e) {
+            OreExcavationFly.LOGGER.warn("Could not read vein files from {}", dir, e);
+            return;
+        }
+        if (loaded.isEmpty()) {
+            OreExcavationFly.LOGGER.warn("No valid vein files in {}, using built-in defaults", dir);
+            ALL = defaults();
+        } else {
+            ALL = List.copyOf(loaded);
+            OreExcavationFly.LOGGER.info("Loaded {} veins", loaded.size());
+        }
+    }
 
     /** A vein located at a chunk. */
     public record Located(Vein vein, int chunkX, int chunkZ) {}
@@ -51,10 +126,11 @@ public final class Veins {
         if (r.nextFloat() >= CELL_CHANCE) return null;
         int x = cellX * CELL + r.nextInt(CELL);
         int z = cellZ * CELL + r.nextInt(CELL);
+        List<Vein> all = ALL;
         int total = 0;
-        for (Vein v : ALL) total += v.weight();
+        for (Vein v : all) total += v.weight();
         int pick = r.nextInt(total);
-        for (Vein v : ALL) {
+        for (Vein v : all) {
             pick -= v.weight();
             if (pick < 0) return new Located(v, x, z);
         }
