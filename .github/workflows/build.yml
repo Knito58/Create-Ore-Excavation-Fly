@@ -22,6 +22,8 @@ jobs:
       - name: Probe Mod Menu and Cloth Config versions
         run: |
           curl -s https://maven.terraformersmc.com/releases/com/terraformersmc/modmenu/maven-metadata.xml | grep -E "<latest>|<release>|<version>2[0-9]\\." || true
+          echo "--- Jade (blamejared)"; curl -s https://maven.blamejared.com/snownee/jade/Jade-fabric/maven-metadata.xml | grep -E "<latest>|<release>|<version>" | tail -12 || true
+          echo "--- Jade (modrinth)"; curl -s https://api.modrinth.com/maven/maven/modrinth/jade/maven-metadata.xml | grep -E "<version>" | tail -12 || true
           curl -s https://maven.shedaniel.me/me/shedaniel/cloth/cloth-config-fabric/maven-metadata.xml | grep -E "<latest>|<release>|<version>26\\." || true
       - name: Build Create Fly from source
         run: |
