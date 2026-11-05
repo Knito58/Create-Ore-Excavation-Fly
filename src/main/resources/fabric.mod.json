@@ -15,7 +15,8 @@
   "entrypoints": {
     "main": ["io.github.knito58.oreexcavationfly.OreExcavationFly"],
     "modmenu": ["io.github.knito58.oreexcavationfly.ModMenuIntegration"],
-    "jade": ["io.github.knito58.oreexcavationfly.JadeIntegration"]
+    "jade": ["io.github.knito58.oreexcavationfly.JadeIntegration"],
+    "jei_mod_plugin": ["io.github.knito58.oreexcavationfly.JeiIntegration"]
   },
   "suggests": {
     "modmenu": "*",
