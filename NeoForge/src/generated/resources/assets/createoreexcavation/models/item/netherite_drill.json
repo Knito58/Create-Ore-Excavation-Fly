@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "createoreexcavation:item/netherite_drill"
-  }
-}
