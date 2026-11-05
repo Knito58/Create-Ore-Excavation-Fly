@@ -1,16 +1,17 @@
 package io.github.knito58.oreexcavationfly;
 
-import com.zurrtum.create.AllTransfer;
 import com.zurrtum.create.content.kinetics.base.KineticBlockEntity;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
@@ -68,11 +69,17 @@ public class DrillBlockEntity extends KineticBlockEntity {
     private ItemStack output(ServerLevel server, ItemStack stack) {
         Direction front = getBlockState().getValue(DrillBlock.FACING);
         BlockPos target = worldPosition.relative(front);
-        // Create Fly's transfer wrapper first (vaults, barrels, chests, ...), vanilla containers as fallback.
-        Container inv = AllTransfer.getInventory(server, target, null, null, front.getOpposite());
-        if (inv == null) inv = HopperBlockEntity.getContainerAt(server, target);
-        if (inv != null) {
-            return HopperBlockEntity.addItem(null, inv, stack, front.getOpposite());
+        // Fabric Transfer API: works for vanilla containers and Create's vaults, barrels etc.
+        // (Wrapping storages as vanilla Containers loses items on merge, so do not do that.)
+        Storage<ItemVariant> storage = ItemStorage.SIDED.find(server, target, front.getOpposite());
+        if (storage != null) {
+            long inserted;
+            try (Transaction tx = Transaction.openOuter()) {
+                inserted = storage.insert(ItemVariant.of(stack), stack.getCount(), tx);
+                tx.commit();
+            }
+            int left = stack.getCount() - (int) inserted;
+            return left <= 0 ? ItemStack.EMPTY : stack.copyWithCount(left);
         }
         Vec3 at = Vec3.atCenterOf(target);
         ItemEntity item = new ItemEntity(server, at.x, at.y, at.z, stack);
