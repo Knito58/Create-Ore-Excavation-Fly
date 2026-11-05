@@ -8,7 +8,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
@@ -25,8 +24,7 @@ public class DrillBlockEntity extends KineticBlockEntity {
     public void tick() {
         super.tick();
         if (!(level instanceof ServerLevel server) || speed == 0 || overStressed) return;
-        ChunkPos cp = new ChunkPos(worldPosition);
-        Veins.Vein vein = Veins.at(server.getSeed(), cp.x(), cp.z());
+        Veins.Vein vein = Veins.at(server.getSeed(), worldPosition.getX() >> 4, worldPosition.getZ() >> 4);
         if (vein == null) return;
 
         progress += Math.abs(speed);
