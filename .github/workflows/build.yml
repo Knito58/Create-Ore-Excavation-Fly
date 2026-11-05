@@ -6,7 +6,7 @@ on:
 
 env:
   # Pinned Create Fly commit. Bump deliberately when porting to a newer Create Fly.
-  CREATE_FLY_REF: main
+  CREATE_FLY_REF: 524c472ee1d044029a3900f76bd87e1f56e898f3
 
 jobs:
   build:
@@ -20,8 +20,10 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Build Create Fly from source
         run: |
-          git clone --depth 1 --branch "$CREATE_FLY_REF" https://github.com/ZurrTum/Create-Fly.git /tmp/create-fly
+          git init /tmp/create-fly
           cd /tmp/create-fly
+          git fetch --depth 1 https://github.com/ZurrTum/Create-Fly.git "$CREATE_FLY_REF"
+          git checkout --detach FETCH_HEAD
           chmod +x gradlew
           ./gradlew build -x test --no-daemon --stacktrace
           mkdir -p "$GITHUB_WORKSPACE/libs"
