@@ -1,0 +1,38 @@
+name: build
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  # Pinned Create Fly commit. Bump deliberately when porting to a newer Create Fly.
+  CREATE_FLY_REF: main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build Create Fly from source
+        run: |
+          git clone --depth 1 --branch "$CREATE_FLY_REF" https://github.com/ZurrTum/Create-Fly.git /tmp/create-fly
+          cd /tmp/create-fly
+          chmod +x gradlew
+          ./gradlew build -x test --no-daemon --stacktrace
+          mkdir -p "$GITHUB_WORKSPACE/libs"
+          ls build/libs
+          cp "$(ls build/libs/*.jar | grep -v -e sources -e server | head -n1)" "$GITHUB_WORKSPACE/libs/create-fly.jar"
+          git rev-parse HEAD > "$GITHUB_WORKSPACE/libs/create-fly.commit"
+      - name: Build Ore Excavation Fly
+        run: |
+          chmod +x gradlew
+          ./gradlew build --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: create-ore-excavation-fly
+          path: build/libs/*.jar
