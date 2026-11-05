@@ -12,6 +12,6 @@ public class OreExcavationFly implements ModInitializer {
     public void onInitialize() {
         Config.load();
         ModBlocks.register();
-        LOGGER.info("Create: Ore Excavation Fly loaded");
+        LOGGER.info("Create: Ore Excavation Fly {} loaded", net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(MOD_ID).map(c -> c.getMetadata().getVersion().getFriendlyString()).orElse("?"));
     }
 }

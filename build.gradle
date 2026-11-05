@@ -2,7 +2,9 @@ plugins {
     id "net.fabricmc.fabric-loom" version "${loom_version}"
 }
 
-version = "${project.mod_version}+mc${project.minecraft_version}"
+// CI builds carry the run number so the exact jar can be told apart in Mod Menu and the log.
+def buildNumber = System.getenv("GITHUB_RUN_NUMBER")
+version = "${project.mod_version}+mc${project.minecraft_version}" + (buildNumber ? ".build${buildNumber}" : ".local")
 group = project.maven_group
 
 base {
