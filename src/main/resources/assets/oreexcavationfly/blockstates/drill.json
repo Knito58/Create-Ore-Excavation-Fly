@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "facing=north": { "model": "oreexcavationfly:block/drill" },
+    "facing=east":  { "model": "oreexcavationfly:block/drill", "y": 90 },
+    "facing=south": { "model": "oreexcavationfly:block/drill", "y": 180 },
+    "facing=west":  { "model": "oreexcavationfly:block/drill", "y": 270 },
+    "facing=up":    { "model": "oreexcavationfly:block/drill", "x": 270 },
+    "facing=down":  { "model": "oreexcavationfly:block/drill", "x": 90 }
+  }
+}
