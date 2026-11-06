@@ -26,12 +26,15 @@ public class Config {
     public int finderExactRangeChunks = 3;
     /** Use cooldown in ticks. */
     public int finderCooldownTicks = 100;
+    /** Seconds of scanning one coal or charcoal lasts. */
+    public int finderSecondsPerCoal = 240;
 
     private void clamp() {
         finderRangeChunks = Math.max(1, Math.min(64, finderRangeChunks));
         finderTypeRangeChunks = Math.max(1, Math.min(finderRangeChunks, finderTypeRangeChunks));
         finderExactRangeChunks = Math.max(0, Math.min(finderTypeRangeChunks, finderExactRangeChunks));
         finderCooldownTicks = Math.max(10, Math.min(1000, finderCooldownTicks));
+        finderSecondsPerCoal = Math.max(30, Math.min(1200, finderSecondsPerCoal));
     }
 
     private static Config instance = new Config();

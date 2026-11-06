@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smithing_transform",
+  "template": "minecraft:redstone",
+  "base": "oreexcavationfly:gold_vein_finder",
+  "addition": "minecraft:diamond_block",
+  "result": {
+    "id": "oreexcavationfly:diamond_vein_finder"
+  }
+}

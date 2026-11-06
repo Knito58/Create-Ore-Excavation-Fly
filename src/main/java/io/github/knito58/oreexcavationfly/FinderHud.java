@@ -9,15 +9,24 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.Identifier;
 
+import java.util.Random;
+
 /**
- * Client side: a small radar in the top-left corner while the Ore Vein Finder is held.
- * Rings mark the type and exact ranges. The blip is a big faint pulse when far
- * and shrinks to a sharp dot when close. The radar turns with the player (up = facing).
+ * Client side: a round green radar in the top-left corner while a Vein Finder is held.
+ * Up is where the player looks. Each light green dot is a possible vein: fuzzy when far,
+ * sharp when close. A sweep line turns round and lights the dots up as it passes.
+ * The inner rings mark the type and exact ranges. Iron and Gold finders flicker now and then.
  */
 public class FinderHud implements ClientModInitializer {
     private static final int R = 32, MARGIN = 6;
+    private static final int BG = 0xC0001A00, RING = 0x2AD02A, DOT = 0x90FF90, TEXT = 0xFF90FF90;
+    /** Sweep period in ms, and flicker pause range in seconds (0 = never), per tier. */
+    private static final int[] SWEEP_MS = {4000, 3000, 2000};
+    private static final int[] FLICKER_MIN = {10, 60, 0}, FLICKER_MAX = {30, 180, 0};
+
+    private static final Random RANDOM = new Random();
     private static FinderReading last;
-    private static long lastTime;
+    private static long lastTime, nextFlicker, flickerEnd;
 
     @Override
     public void onInitializeClient() {
@@ -33,41 +42,74 @@ public class FinderHud implements ClientModInitializer {
         LocalPlayer player = mc.player;
         FinderReading r = last;
         long now = System.currentTimeMillis();
-        if (player == null || r == null || mc.options.hideGui || now - lastTime > 1500) return;
-        if (!player.getMainHandItem().is(ModBlocks.VEIN_FINDER) && !player.getOffhandItem().is(ModBlocks.VEIN_FINDER)) return;
+        if (player == null || r == null || mc.gui.hud.isHidden() || now - lastTime > 1500 || VeinFinderItem.held(player).isEmpty()) return;
 
         int cx = MARGIN + R, cy = MARGIN + R;
-        disc(g, cx, cy, R, 0x90000000);
-        ring(g, cx, cy, R, 0xC040FF40);
-        ring(g, cx, cy, R * r.typeRange() / r.range(), 0x6040FF40);
-        if (r.exactRange() > 0) ring(g, cx, cy, R * r.exactRange() / r.range(), 0x6040FF40);
-        g.fill(cx - 1, cy - 1, cx + 2, cy + 2, 0xFFFFFFFF); // the player
-        g.fill(cx, cy - 4, cx + 1, cy - 1, 0xFFFFFFFF);     // facing tick
+        disc(g, cx, cy, R + 1, 0xFF0A0A0A);
+        disc(g, cx, cy, R, BG);
+        if (!r.powered()) {
+            ring(g, cx, cy, R, argb(RING, 0.3));
+            g.text(mc.font, r.text(), MARGIN, MARGIN + 2 * R + 5, 0xFF808080, true);
+            return;
+        }
+        ring(g, cx, cy, R, argb(RING, 1.0));
+        ring(g, cx, cy, R * r.typeRange() / r.range(), argb(RING, 0.45));
+        if (r.exactRange() > 0) ring(g, cx, cy, R * r.exactRange() / r.range(), argb(RING, 0.45));
+        g.fill(cx - R + 1, cy, cx + R, cy + 1, argb(RING, 0.2));
+        g.fill(cx, cy - R + 1, cx + 1, cy + R, argb(RING, 0.2));
 
         double yaw = Math.toRadians(player.getYRot());
         // North marker: world north is angle -PI/2 (towards -z).
-        int nx = cx - (int) Math.round(Math.cos(-Math.PI / 2 - yaw) * (R - 5));
-        int ny = cy - (int) Math.round(Math.sin(-Math.PI / 2 - yaw) * (R - 5));
-        g.text(mc.font, "N", nx - 2, ny - 4, 0xA0FFFFFF, false);
+        g.text(mc.font, "N", cx - 2 - (int) Math.round(Math.cos(-Math.PI / 2 - yaw) * (R - 6)),
+            cy - 4 - (int) Math.round(Math.sin(-Math.PI / 2 - yaw) * (R - 6)), argb(RING, 0.8), false);
 
-        double pulse = 0.5 + 0.5 * Math.sin(now / 200.0);
-        if (r.tier() == FinderReading.HERE) {
-            disc(g, cx, cy, 5, alpha(0xFF3030, 0.5 + 0.5 * pulse));
-        } else if (r.tier() != FinderReading.NOTHING) {
-            double k = Math.min(1.0, r.dist() / r.range()) * R;
-            int bx = cx - (int) Math.round(Math.cos(r.angle() - yaw) * k);
-            int by = cy - (int) Math.round(Math.sin(r.angle() - yaw) * k);
-            switch (r.tier()) {
-                case FinderReading.WEAK -> disc(g, bx, by, 9, alpha(0xFFFF60, 0.15 + 0.25 * pulse));
-                case FinderReading.MEDIUM -> disc(g, bx, by, 6, alpha(0xFFC040, 0.3 + 0.3 * pulse));
-                case FinderReading.TYPE_KNOWN -> disc(g, bx, by, 3, alpha(0xFF9020, 0.7 + 0.3 * pulse));
-                default -> disc(g, bx, by, 2, 0xFFFF3030);
+        int tier = Math.max(0, Math.min(2, r.tier()));
+        boolean flicker = flicker(now, tier);
+        double sweep = 2 * Math.PI * (now % SWEEP_MS[tier]) / SWEEP_MS[tier];
+        if (!flicker) {
+            for (int i = 0; i < 6; i++) line(g, cx, cy, sweep - i * 0.06, argb(RING, 0.7 - i * 0.11));
+            for (FinderReading.Dot d : r.dots()) {
+                double k = Math.min(1.0, d.dist() / r.range()) * (R - 2);
+                int bx = cx - (int) Math.round(Math.cos(d.angle() - yaw) * k);
+                int by = cy - (int) Math.round(Math.sin(d.angle() - yaw) * k);
+                // How long ago the sweep passed this dot, as a fraction of a turn: fresh dots glow.
+                double since = Math.floorMod((long) ((sweep - Math.atan2(by - cy, bx - cx)) * 1000), (long) (2000 * Math.PI)) / (2000 * Math.PI);
+                double glow = 1.0 - 0.7 * since;
+                switch (d.sharp()) {
+                    case 0 -> disc(g, bx, by, 2, argb(DOT, 0.45 * glow));
+                    case 1 -> disc(g, bx, by, 1, argb(DOT, 0.85 * glow));
+                    default -> {
+                        disc(g, bx, by, 1, argb(DOT, glow));
+                        g.fill(bx, by, bx + 1, by + 1, 0xFFFFFFFF);
+                    }
+                }
+            }
+        } else {
+            for (int i = 0; i < 160; i++) { // snow
+                int x = RANDOM.nextInt(2 * R) - R, y = RANDOM.nextInt(2 * R) - R;
+                if (x * x + y * y < R * R) g.fill(cx + x, cy + y, cx + x + 1, cy + y + 1, argb(DOT, 0.3 + RANDOM.nextDouble() * 0.6));
             }
         }
-        g.text(mc.font, r.text(), MARGIN, MARGIN + 2 * R + 4, 0xFFFFFFFF, true);
+        g.fill(cx - 1, cy - 1, cx + 2, cy + 2, 0xFFFFFFFF); // the player
+        g.fill(cx, cy - 4, cx + 1, cy - 1, 0xFFFFFFFF);     // facing
+        g.text(mc.font, r.text(), MARGIN, MARGIN + 2 * R + 5, TEXT, true);
     }
 
-    private static int alpha(int rgb, double a) {
+    /** Iron and Gold finders flicker for a moment now and then. */
+    private static boolean flicker(long now, int tier) {
+        if (FLICKER_MAX[tier] <= 0) return false;
+        if (now < flickerEnd) return true;
+        if (nextFlicker == 0 || nextFlicker - now > FLICKER_MAX[tier] * 1000L) {
+            nextFlicker = now + 1000L * (FLICKER_MIN[tier] + RANDOM.nextInt(FLICKER_MAX[tier] - FLICKER_MIN[tier] + 1));
+        } else if (now >= nextFlicker) {
+            flickerEnd = now + 300 + RANDOM.nextInt(450);
+            nextFlicker = 0;
+            return true;
+        }
+        return false;
+    }
+
+    private static int argb(int rgb, double a) {
         return ((int) (Math.max(0, Math.min(1, a)) * 255) << 24) | rgb;
     }
 
@@ -87,6 +129,18 @@ public class FinderHud implements ClientModInitializer {
             double a = 2 * Math.PI * i / steps;
             int x = cx + (int) Math.round(Math.cos(a) * radius);
             int y = cy + (int) Math.round(Math.sin(a) * radius);
+            if (x != px || y != py) g.fill(x, y, x + 1, y + 1, color);
+            px = x;
+            py = y;
+        }
+    }
+
+    /** Sweep line from the centre to the edge, at screen angle a. */
+    private static void line(GuiGraphicsExtractor g, int cx, int cy, double a, int color) {
+        int px = Integer.MIN_VALUE, py = 0;
+        for (int i = 2; i < R; i++) {
+            int x = cx + (int) Math.round(Math.cos(a) * i);
+            int y = cy + (int) Math.round(Math.sin(a) * i);
             if (x != px || y != py) g.fill(x, y, x + 1, y + 1, color);
             px = x;
             py = y;

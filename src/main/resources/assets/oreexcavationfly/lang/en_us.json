@@ -8,7 +8,7 @@
   "vein.oreexcavationfly.lapis": "Lapis Vein",
   "vein.oreexcavationfly.diamond": "Diamond Vein",
   "vein.oreexcavationfly.emerald": "Emerald Vein",
-  "item.oreexcavationfly.vein_finder": "Ore Vein Finder",
+  "item.oreexcavationfly.vein_finder": "Iron Ore Vein Finder",
   "message.oreexcavationfly.finder.nothing": "No ore signal in range",
   "message.oreexcavationfly.finder.here": "%s right below you",
   "message.oreexcavationfly.finder.exact": "%s in chunk %s, %s (%s)",
@@ -25,7 +25,7 @@
   "direction.oreexcavationfly.north_east": "north-east",
   "config.oreexcavationfly.title": "Create: Ore Excavation Fly",
   "config.oreexcavationfly.finder": "Vein Finder",
-  "config.oreexcavationfly.finderRangeChunks": "Finder range (chunks)",
+  "config.oreexcavationfly.finderRangeChunks": "Finder range (chunks, Iron tier)",
   "config.oreexcavationfly.finderTypeRangeChunks": "Vein type is shown within (chunks)",
   "config.oreexcavationfly.finderExactRangeChunks": "Exact chunk is shown within (chunks)",
   "config.oreexcavationfly.finderCooldownTicks": "Finder cooldown (ticks)",
@@ -39,5 +39,10 @@
   "jei.oreexcavationfly.ore_header": "Can be drilled with the Ore Drill from:",
   "jei.oreexcavationfly.vein_line": "%s: one item every %s s at 32 RPM",
   "jei.oreexcavationfly.drill_info": "Place on the chunk of an ore vein with the shaft end (back) towards the power source. The front face is the output: put a chest, vault, barrel or belt there. Twice the speed means twice the ore. Find veins with the Ore Vein Finder.",
-  "jei.oreexcavationfly.finder_info": "Hold it to see the radar in the top-left corner, or right-click to scan. Far away it only points in a rough direction. Closer, it names the vein type, and within a few chunks it gives the exact chunk. On the radar a far vein is a big faint pulse, a near one a sharp red dot; the inner rings mark the type and exact ranges. Stand in that chunk and place an Ore Drill."
+  "jei.oreexcavationfly.finder_info": "Hold it to see the radar in the top-left corner; right-click prints the nearest vein in the action bar. It burns coal or charcoal from your inventory while held (one coal lasts 4 minutes by default). Every light green dot is a possible vein: blurred and roughly placed when far, sharp when close. The inner rings mark where the vein type and then the exact chunk are revealed. Stand in the vein's chunk and place an Ore Drill.",
+  "item.oreexcavationfly.gold_vein_finder": "Gold Ore Vein Finder",
+  "item.oreexcavationfly.diamond_vein_finder": "Diamond Ore Vein Finder",
+  "message.oreexcavationfly.finder.no_fuel": "No coal: put coal or charcoal in your inventory",
+  "config.oreexcavationfly.finderSecondsPerCoal": "Seconds one coal lasts",
+  "jei.oreexcavationfly.finder_tiers": "Tiers: Iron sees 16 chunks and flickers often. Gold sees 1.5 times as far, aims better and flickers rarely. Diamond sees twice as far, aims best and never flickers. Upgrade on the smithing table: redstone + finder + gold block or diamond block. The coal inside carries over."
 }

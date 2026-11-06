@@ -7,30 +7,50 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * One Vein Finder reading, sent from server to client for the radar HUD.
- * angle is the (already blurred) world direction atan2(dz, dx); dist is in chunks (already rounded when far).
+ * Ranges are in chunks. Each dot is a vein: angle is the (already blurred) world direction
+ * atan2(dz, dx), dist in chunks (already rounded when far), sharp 0 = far, 1 = type range, 2 = exact range.
  */
-public record FinderReading(int tier, float angle, float dist, int range, int typeRange, int exactRange, Component text)
+public record FinderReading(int tier, boolean powered, int range, int typeRange, int exactRange, Component text, List<Dot> dots)
         implements CustomPacketPayload {
-    public static final int NOTHING = 0, WEAK = 1, MEDIUM = 2, TYPE_KNOWN = 3, EXACT = 4, HERE = 5;
+    public record Dot(float angle, float dist, int sharp) {}
 
     public static final Type<FinderReading> TYPE = new Type<>(Identifier.fromNamespaceAndPath(OreExcavationFly.MOD_ID, "finder_reading"));
     public static final StreamCodec<RegistryFriendlyByteBuf, FinderReading> CODEC = CustomPacketPayload.codec(FinderReading::write, FinderReading::read);
 
+    /** A finder without fuel: dark radar, just the message. */
+    public static FinderReading off(int tier, Component text) {
+        return new FinderReading(tier, false, 1, 1, 0, text, List.of());
+    }
+
     private void write(RegistryFriendlyByteBuf buf) {
         buf.writeVarInt(tier);
-        buf.writeFloat(angle);
-        buf.writeFloat(dist);
+        buf.writeBoolean(powered);
         buf.writeVarInt(range);
         buf.writeVarInt(typeRange);
         buf.writeVarInt(exactRange);
         ComponentSerialization.STREAM_CODEC.encode(buf, text);
+        buf.writeVarInt(dots.size());
+        for (Dot d : dots) {
+            buf.writeFloat(d.angle());
+            buf.writeFloat(d.dist());
+            buf.writeVarInt(d.sharp());
+        }
     }
 
     private static FinderReading read(RegistryFriendlyByteBuf buf) {
-        return new FinderReading(buf.readVarInt(), buf.readFloat(), buf.readFloat(),
-            buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), ComponentSerialization.STREAM_CODEC.decode(buf));
+        int tier = buf.readVarInt();
+        boolean powered = buf.readBoolean();
+        int range = buf.readVarInt(), typeRange = buf.readVarInt(), exactRange = buf.readVarInt();
+        Component text = ComponentSerialization.STREAM_CODEC.decode(buf);
+        int n = buf.readVarInt();
+        List<Dot> dots = new ArrayList<>(n);
+        for (int i = 0; i < n; i++) dots.add(new Dot(buf.readFloat(), buf.readFloat(), buf.readVarInt()));
+        return new FinderReading(tier, powered, range, typeRange, exactRange, text, dots);
     }
 
     @Override
