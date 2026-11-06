@@ -11,6 +11,7 @@
     "issues": "https://github.com/Knito58/Create-Ore-Excavation-Fly/issues"
   },
   "license": "MIT",
+  "icon": "assets/oreexcavationfly/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": ["io.github.knito58.oreexcavationfly.OreExcavationFly"],
