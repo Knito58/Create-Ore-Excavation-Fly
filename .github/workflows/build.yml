@@ -76,8 +76,9 @@ jobs:
           API=https://minecraft.curseforge.com/api
           VERSIONS=$(curl -sSf -H "X-Api-Token: $CF_TOKEN" "$API/game/versions")
           # Minecraft 26.3, the Fabric loader, and Java 25 when CurseForge lists it
-          IDS=$(echo "$VERSIONS" | jq -c '[.[] | select(.name=="26.3" or .name=="Fabric" or .name=="Java 25") | .id]')
+          IDS=$(echo "$VERSIONS" | jq -c '[.[] | select((.name=="26.3" and .gameVersionTypeID!=1) or .name=="Fabric" or .name=="Java 25" or .name=="Client" or .name=="Server") | .id]')
           echo "game version ids: $IDS"
+          echo "$VERSIONS" | jq -c '.[] | select(.name=="26.3" or .name=="Fabric" or .name=="Java 25" or .name=="Client" or .name=="Server")' 
           echo "$VERSIONS" | jq -e '[.[] | select(.name=="26.3")] | length > 0' >/dev/null || { echo "CurseForge does not know Minecraft 26.3"; exit 1; }
           echo "$VERSIONS" | jq -e '[.[] | select(.name=="Fabric")] | length > 0' >/dev/null || { echo "CurseForge does not know the Fabric loader"; exit 1; }
           VERSION=$(sed -n 's/^mod_version *= *//p' gradle.properties | tr -d ' \r')
@@ -90,9 +91,11 @@ jobs:
             changelog: "First release.\n\n- Ore veins in every world, vein types as JSON files\n- Ore Drill: single block, outputs into the vault, barrel or chest in front of it\n- Ore Vein Finder: radar that gets more precise when you get closer\n- Optional: Mod Menu and Cloth Config, Jade, JEI",
             gameVersions: $ids
           }')
-          curl -sSf -H "X-Api-Token: $CF_TOKEN" \
+          CODE=$(curl -sS -o response.txt -w '%{http_code}' -H "X-Api-Token: $CF_TOKEN" \
             -F "metadata=$META" -F "file=@$JAR" \
-            "$API/projects/$CF_PROJECT_ID/upload-file"
+            "$API/projects/$CF_PROJECT_ID/upload-file")
+          echo "HTTP $CODE"; cat response.txt; echo
+          test "$CODE" = 200
       - name: GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
