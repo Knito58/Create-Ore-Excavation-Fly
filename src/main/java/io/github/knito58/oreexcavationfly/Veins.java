@@ -3,7 +3,10 @@ package io.github.knito58.oreexcavationfly;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Item;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -38,6 +41,12 @@ public final class Veins {
      * @param ticksAt32 ticks per item at 32 RPM
      */
     public record Vein(String id, String name, String item, int weight, int ticksAt32) {
+        /** The item this vein yields, or null if the id is malformed or not registered. */
+        public Item itemOrNull() {
+            Identifier id = item == null ? null : Identifier.tryParse(item);
+            return id != null && BuiltInRegistries.ITEM.containsKey(id) ? BuiltInRegistries.ITEM.getValue(id) : null;
+        }
+
         public Component displayName() {
             return name != null && !name.isBlank() ? Component.literal(name) : Component.translatable("vein.oreexcavationfly." + id);
         }
@@ -108,6 +117,20 @@ public final class Veins {
             ALL = List.copyOf(loaded);
             OreExcavationFly.LOGGER.info("Loaded {} veins", loaded.size());
         }
+    }
+
+    /**
+     * Drops veins whose item does not exist (typo, or the mod is missing). Called when the server
+     * starts, because other mods may register their items after our own init.
+     */
+    public static void dropUnknownItems() {
+        List<Vein> ok = new ArrayList<>();
+        for (Vein v : ALL) {
+            if (v.itemOrNull() != null) ok.add(v);
+            else OreExcavationFly.LOGGER.warn("Vein '{}' disabled: unknown item '{}'", v.id(), v.item());
+        }
+        if (ok.size() == ALL.size()) return;
+        ALL = ok.isEmpty() ? defaults() : List.copyOf(ok);
     }
 
     /** A vein located at a chunk. */

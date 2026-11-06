@@ -13,6 +13,8 @@ public class OreExcavationFly implements ModInitializer {
         Config.load();
         Veins.load();
         ModBlocks.register();
+        com.zurrtum.create.api.stress.BlockStressValues.IMPACTS.register(ModBlocks.DRILL, () -> Config.get().drillStressImpact);
+        net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTING.register(s -> Veins.dropUnknownItems());
         net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.clientboundPlay().register(FinderReading.TYPE, FinderReading.CODEC);
         net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(VeinFinderItem::tick);
         net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents

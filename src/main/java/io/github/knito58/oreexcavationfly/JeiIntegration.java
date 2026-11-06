@@ -2,7 +2,6 @@ package io.github.knito58.oreexcavationfly;
 
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.registration.IRecipeRegistration;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
@@ -27,7 +26,8 @@ public class JeiIntegration implements IModPlugin {
     public void registerRecipes(IRecipeRegistration registration) {
         Map<Item, List<Component>> byItem = new LinkedHashMap<>();
         for (Veins.Vein v : Veins.ALL) {
-            Item item = BuiltInRegistries.ITEM.getValue(Identifier.parse(v.item()));
+            Item item = v.itemOrNull();
+            if (item == null) continue;
             byItem.computeIfAbsent(item, k -> new ArrayList<>()).add(
                 Component.translatable("jei.oreexcavationfly.vein_line",
                     v.displayName(), String.format("%.1f", v.ticksAt32() / 20f)));

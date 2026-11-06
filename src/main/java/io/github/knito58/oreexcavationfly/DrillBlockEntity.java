@@ -7,8 +7,6 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -34,19 +32,21 @@ public class DrillBlockEntity extends KineticBlockEntity {
             pending = output(server, pending);
             if (!pending.isEmpty()) return; // target full: stall until there is room
         }
-        Veins.Vein vein = Veins.at(server.getSeed(), worldPosition.getX() >> 4, worldPosition.getZ() >> 4);
+        Veins.Vein vein = veinHere();
         if (vein == null) return;
+        net.minecraft.world.item.Item item = vein.itemOrNull();
+        if (item == null) return;
 
         progress += Math.abs(speed);
         float needed = vein.ticksAt32() * 32f;
         if (progress < needed) return;
         progress -= needed;
-        pending = output(server, new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.parse(vein.item()))));
+        pending = output(server, new ItemStack(item));
     }
 
     /** The vein in this drill's chunk, or null (server side only). */
     public Veins.Vein veinHere() {
-        if (!(level instanceof ServerLevel server)) return null;
+        if (!(level instanceof ServerLevel server) || !Config.hasVeins(server)) return null;
         return Veins.at(server.getSeed(), worldPosition.getX() >> 4, worldPosition.getZ() >> 4);
     }
 

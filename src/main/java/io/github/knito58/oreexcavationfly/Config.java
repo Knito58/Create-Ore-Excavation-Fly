@@ -31,6 +31,12 @@ public class Config {
     /** Seconds of scanning one coal or charcoal lasts. */
     public int finderSecondsPerCoal = 240;
 
+    // --- drill and veins ---
+    /** Stress impact of the drill in SU per RPM (Create's mechanical drill uses 4). */
+    public double drillStressImpact = 8.0;
+    /** Dimensions that have ore veins. */
+    public java.util.List<String> veinDimensions = java.util.List.of("minecraft:overworld");
+
     private void clamp() {
         finderRangeChunks = Math.max(1, Math.min(64, finderRangeChunks));
         finderTypeRangeChunks = Math.max(1, Math.min(finderRangeChunks, finderTypeRangeChunks));
@@ -38,12 +44,19 @@ public class Config {
         finderCooldownTicks = Math.max(10, Math.min(1000, finderCooldownTicks));
         finderRadarRadius = Math.max(24, Math.min(160, finderRadarRadius));
         finderSecondsPerCoal = Math.max(30, Math.min(1200, finderSecondsPerCoal));
+        drillStressImpact = Math.max(0, Math.min(1024, drillStressImpact));
+        if (veinDimensions == null) veinDimensions = java.util.List.of("minecraft:overworld");
     }
 
     private static Config instance = new Config();
 
     public static Config get() {
         return instance;
+    }
+
+    /** True if this dimension has ore veins. */
+    public static boolean hasVeins(net.minecraft.world.level.Level level) {
+        return instance.veinDimensions.contains(level.dimension().identifier().toString());
     }
 
     private static Path file() {
