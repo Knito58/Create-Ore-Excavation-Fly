@@ -11,7 +11,7 @@ Requires Create Fly and Fabric API. Built and tested against the unofficial Crea
 
 ## Origin
 
-A stripped-down port of [Create: Ore Excavation](https://github.com/tom5454/Create-Ore-Excavation) by tom5454 (MIT). Fluid extraction, sample drills and several integrations are intentionally not ported. The original NeoForge 1.21.1 sources are kept in `reference/` as a porting aid and are not built.
+A stripped-down port of [Create: Ore Excavation](https://github.com/tom5454/Create-Ore-Excavation) by tom5454 (MIT). Fluid extraction, sample drills and several integrations are intentionally not ported. The original sources remain available in the upstream repository.
 
 ## How this mod is made
 
