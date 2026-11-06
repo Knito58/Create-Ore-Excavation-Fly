@@ -15,7 +15,7 @@ A stripped-down port of [Create: Ore Excavation](https://github.com/tom5454/Crea
 
 ## How this mod is made
 
-The port was written by Claude AI. Knito58 decides what goes in and tests every build in game.
+The port was written by Claude AI. Konitor decides what goes in and tests every build in game.
 Builds come from GitHub Actions (the number in the version, e.g. `0.0.1+mc26.3.build47`, is the CI run).
 
 See `Credits.md` and `LICENSE`.
