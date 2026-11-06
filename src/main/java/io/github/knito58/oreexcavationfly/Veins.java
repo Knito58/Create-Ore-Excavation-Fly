@@ -59,6 +59,7 @@ public final class Veins {
             new Vein("iron", null, "minecraft:raw_iron", 30, 100),
             new Vein("copper", null, "minecraft:raw_copper", 30, 80),
             new Vein("gold", null, "minecraft:raw_gold", 12, 140),
+            new Vein("zinc", null, "create:raw_zinc", 24, 90),
             new Vein("coal", null, "minecraft:coal", 30, 60),
             new Vein("redstone", null, "minecraft:redstone", 14, 100),
             new Vein("lapis", null, "minecraft:lapis_lazuli", 10, 100),
