@@ -19,9 +19,7 @@ public class OreExcavationFly implements ModInitializer {
             .modifyOutputEvent(net.minecraft.world.item.CreativeModeTabs.FUNCTIONAL_BLOCKS)
             .register(tab -> {
                 tab.accept(ModBlocks.DRILL);
-                tab.accept(ModBlocks.VEIN_FINDER);
-                tab.accept(ModBlocks.GOLD_VEIN_FINDER);
-                tab.accept(ModBlocks.DIAMOND_VEIN_FINDER);
+                ModBlocks.FINDERS.forEach(tab::accept);
             });
         LOGGER.info("Create: Ore Excavation Fly {} loaded", net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(MOD_ID).map(c -> c.getMetadata().getVersion().getFriendlyString()).orElse("?"));
     }

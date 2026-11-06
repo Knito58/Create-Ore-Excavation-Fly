@@ -39,10 +39,11 @@
   "jei.oreexcavationfly.ore_header": "Can be drilled with the Ore Drill from:",
   "jei.oreexcavationfly.vein_line": "%s: one item every %s s at 32 RPM",
   "jei.oreexcavationfly.drill_info": "Place on the chunk of an ore vein with the shaft end (back) towards the power source. The front face is the output: put a chest, vault, barrel or belt there. Twice the speed means twice the ore. Find veins with the Ore Vein Finder.",
-  "jei.oreexcavationfly.finder_info": "Hold it to see the radar in the top-left corner; right-click prints the nearest vein in the action bar. It burns coal or charcoal from your inventory while held (one coal lasts 4 minutes by default). Every light green dot is a possible vein: blurred and roughly placed when far, sharp when close. The inner rings mark where the vein type and then the exact chunk are revealed. Stand in the vein's chunk and place an Ore Drill.",
-  "item.oreexcavationfly.gold_vein_finder": "Gold Ore Vein Finder",
+  "jei.oreexcavationfly.finder_info": "Hold it to see the radar in the top-left corner; right-click prints the nearest vein in the action bar. It burns coal or charcoal from your inventory while held (one coal lasts 4 minutes by default). Every light green dot is a possible vein, but scattered ordinary ore also shows up as false echoes that fade away when you come closer. Real veins are blurred and roughly placed when far, sharp when close. The inner rings mark where the vein type and then the exact chunk are revealed. Stand in the vein's chunk and place an Ore Drill.",
   "item.oreexcavationfly.diamond_vein_finder": "Diamond Ore Vein Finder",
   "message.oreexcavationfly.finder.no_fuel": "No coal: put coal or charcoal in your inventory",
   "config.oreexcavationfly.finderSecondsPerCoal": "Seconds one coal lasts",
-  "jei.oreexcavationfly.finder_tiers": "Tiers: Iron sees 16 chunks and flickers often. Gold sees 1.5 times as far, aims better and flickers rarely. Diamond sees twice as far, aims best and never flickers. Upgrade on the smithing table: redstone + finder + gold block or diamond block. The coal inside carries over."
+  "jei.oreexcavationfly.finder_tiers": "Tiers: Copper (crafted) sees 12 chunks, is easily fooled by false echoes and flickers a lot. Iron sees 16 chunks, Brass 24 and Diamond 32; each aims better, shows fewer false echoes and flickers less. Diamond shows none and never flickers. Upgrade on the smithing table: redstone + finder + iron block, brass block or diamond block. The coal inside carries over.",
+  "item.oreexcavationfly.copper_vein_finder": "Copper Ore Vein Finder",
+  "item.oreexcavationfly.brass_vein_finder": "Brass Ore Vein Finder"
 }

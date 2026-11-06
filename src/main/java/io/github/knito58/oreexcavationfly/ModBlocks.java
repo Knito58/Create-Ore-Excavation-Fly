@@ -23,8 +23,9 @@ public final class ModBlocks {
 
     public static DrillBlock DRILL;
     public static BlockEntityType<DrillBlockEntity> DRILL_BE;
-    /** Iron, Gold and Diamond Vein Finder. */
-    public static Item VEIN_FINDER, GOLD_VEIN_FINDER, DIAMOND_VEIN_FINDER;
+    /** The Vein Finder tiers, lowest first: Copper, Iron, Brass, Diamond. The Iron one keeps the old id. */
+    public static Item VEIN_FINDER;
+    public static java.util.List<Item> FINDERS;
     /** Ticks of scanning left from the coal burning in a Vein Finder. */
     public static final DataComponentType<Integer> FINDER_FUEL = Registry.register(
         BuiltInRegistries.DATA_COMPONENT_TYPE, id("fuel"),
@@ -50,9 +51,9 @@ public final class ModBlocks {
             BuiltInRegistries.ITEM, itemKey,
             new BlockItem(DRILL, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix())
         );
-        VEIN_FINDER = finder("vein_finder", 0);
-        GOLD_VEIN_FINDER = finder("gold_vein_finder", 1);
-        DIAMOND_VEIN_FINDER = finder("diamond_vein_finder", 2);
+        Item copper = finder("copper_vein_finder", 0);
+        VEIN_FINDER = finder("vein_finder", 1);
+        FINDERS = java.util.List.of(copper, VEIN_FINDER, finder("brass_vein_finder", 2), finder("diamond_vein_finder", 3));
         DRILL_BE = Registry.register(
             BuiltInRegistries.BLOCK_ENTITY_TYPE, id("drill"),
             new BlockEntityType<>(DrillBlockEntity::new, Set.of(DRILL))

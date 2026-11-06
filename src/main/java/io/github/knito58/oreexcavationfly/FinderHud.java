@@ -15,14 +15,14 @@ import java.util.Random;
  * Client side: a round green radar in the top-left corner while a Vein Finder is held.
  * Up is where the player looks. Each light green dot is a possible vein: fuzzy when far,
  * sharp when close. A sweep line turns round and lights the dots up as it passes.
- * The inner rings mark the type and exact ranges. Iron and Gold finders flicker now and then.
+ * The inner rings mark the type and exact ranges. Copper, Iron and Brass finders flicker now and then.
  */
 public class FinderHud implements ClientModInitializer {
     private static final int R = 32, MARGIN = 6;
     private static final int BG = 0xC0001A00, RING = 0x2AD02A, DOT = 0x90FF90, TEXT = 0xFF90FF90;
     /** Sweep period in ms, and flicker pause range in seconds (0 = never), per tier. */
-    private static final int[] SWEEP_MS = {4000, 3000, 2000};
-    private static final int[] FLICKER_MIN = {10, 60, 0}, FLICKER_MAX = {30, 180, 0};
+    private static final int[] SWEEP_MS = {4500, 4000, 3000, 2000};
+    private static final int[] FLICKER_MIN = {5, 10, 60, 0}, FLICKER_MAX = {15, 30, 180, 0};
 
     private static final Random RANDOM = new Random();
     private static FinderReading last;
@@ -63,7 +63,7 @@ public class FinderHud implements ClientModInitializer {
         g.text(mc.font, "N", cx - 2 - (int) Math.round(Math.cos(-Math.PI / 2 - yaw) * (R - 6)),
             cy - 4 - (int) Math.round(Math.sin(-Math.PI / 2 - yaw) * (R - 6)), argb(RING, 0.8), false);
 
-        int tier = Math.max(0, Math.min(2, r.tier()));
+        int tier = Math.max(0, Math.min(3, r.tier()));
         boolean flicker = flicker(now, tier);
         double sweep = 2 * Math.PI * (now % SWEEP_MS[tier]) / SWEEP_MS[tier];
         if (!flicker) {
@@ -95,7 +95,7 @@ public class FinderHud implements ClientModInitializer {
         g.text(mc.font, r.text(), MARGIN, MARGIN + 2 * R + 5, TEXT, true);
     }
 
-    /** Iron and Gold finders flicker for a moment now and then. */
+    /** Lower tiers flicker for a moment now and then. */
     private static boolean flicker(long now, int tier) {
         if (FLICKER_MAX[tier] <= 0) return false;
         if (now < flickerEnd) return true;

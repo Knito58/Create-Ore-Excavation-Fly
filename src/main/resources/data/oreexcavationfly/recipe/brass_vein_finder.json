@@ -2,8 +2,8 @@
   "type": "minecraft:smithing_transform",
   "template": "minecraft:redstone",
   "base": "oreexcavationfly:vein_finder",
-  "addition": "minecraft:gold_block",
+  "addition": "create:brass_block",
   "result": {
-    "id": "oreexcavationfly:gold_vein_finder"
+    "id": "oreexcavationfly:brass_vein_finder"
   }
 }

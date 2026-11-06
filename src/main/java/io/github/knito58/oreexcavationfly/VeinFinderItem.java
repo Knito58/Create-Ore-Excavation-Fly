@@ -23,7 +23,9 @@ import java.util.Random;
  * dot on the radar HUD: far dots are blurred, near ones sharp. The nearest vein is described
  * in words: far only a direction, closer the vein type, very close the exact chunk.
  * Right-click prints that line in the action bar.
- * Three tiers: Iron (the base finder), Gold and Diamond see farther, sharper and flicker less.
+ * Four tiers: Copper, Iron, Brass, Diamond. Each sees farther and sharper, flickers less and is
+ * fooled by fewer false echoes (scattered ordinary ore that looks like a far vein and fades out
+ * when approached). False echoes are placed from the world seed, so they stay put.
  * All blurring happens here on the server, so the client never learns more than it shows.
  */
 public class VeinFinderItem extends Item {
@@ -32,12 +34,13 @@ public class VeinFinderItem extends Item {
     private static final int HUD_INTERVAL = 10;
     /** Fuel is burnt in steps of this many ticks, to keep item updates rare. */
     private static final int BURN_STEP = 20;
-    /** Range multiplier per tier: Iron, Gold, Diamond. */
-    private static final double[] RANGE_FACTOR = {1.0, 1.5, 2.0};
-    /** Direction blur multiplier per tier. */
-    private static final double[] BLUR_FACTOR = {1.0, 0.6, 0.3};
+    /** Per tier (Copper, Iron, Brass, Diamond): range multiplier, direction blur multiplier, false echoes per vein cell. */
+    private static final double[] RANGE_FACTOR = {0.75, 1.0, 1.5, 2.0};
+    private static final double[] BLUR_FACTOR = {1.3, 1.0, 0.6, 0.3};
+    private static final double[] ECHOES = {3.0, 1.5, 0.6, 0.0};
+    private static final int MAX_ECHOES_PER_CELL = 3;
 
-    /** 0 = Iron, 1 = Gold, 2 = Diamond. */
+    /** 0 = Copper, 1 = Iron, 2 = Brass, 3 = Diamond. */
     public final int tier;
 
     public VeinFinderItem(int tier, Properties properties) {
@@ -157,7 +160,7 @@ public class VeinFinderItem extends Item {
             // Radar position: from the player's exact position to the vein chunk's centre, in chunks.
             double dx = l.chunkX() + 0.5 - player.getX() / 16.0;
             double dz = l.chunkZ() + 0.5 - player.getZ() / 16.0;
-            double angle = Math.atan2(dz, dx) + blur(l, d, range, exactRange) * BLUR_FACTOR[tier];
+            double angle = Math.atan2(dz, dx) + blur(l.chunkX(), l.chunkZ(), d, range, exactRange) * BLUR_FACTOR[tier];
             double dist = Math.hypot(dx, dz);
             int sharp = d <= exactRange ? 2 : d <= typeRange ? 1 : 0;
             if (sharp == 0) dist = Math.max(typeRange, Math.round(dist / 4.0) * 4.0); // far: rough distance only
@@ -165,6 +168,21 @@ public class VeinFinderItem extends Item {
             if (d < bestDist) {
                 bestDist = d;
                 best = l;
+                bestAngle = angle;
+            }
+        }
+
+        // False echoes only show while far (outside the type ring); the nearest one may fool the text too.
+        for (int[] e : echoes(server.getSeed(), pcx, pcz, range, ECHOES[tier])) {
+            double d = Math.hypot(e[0] - pcx, e[1] - pcz);
+            if (d > range || d <= typeRange) continue;
+            double dx = e[0] + 0.5 - player.getX() / 16.0;
+            double dz = e[1] + 0.5 - player.getZ() / 16.0;
+            double angle = Math.atan2(dz, dx) + blur(e[0], e[1], d, range, exactRange) * BLUR_FACTOR[tier];
+            dots.add(new FinderReading.Dot((float) angle, (float) Math.max(typeRange, Math.round(Math.hypot(dx, dz) / 4.0) * 4.0), 0));
+            if (d < bestDist && bestDist > typeRange) { // a real vein inside the type ring always wins
+                bestDist = d;
+                best = new Veins.Located(null, e[0], e[1]);
                 bestAngle = angle;
             }
         }
@@ -192,12 +210,33 @@ public class VeinFinderItem extends Item {
         return l.vein().displayName();
     }
 
-    /** Fixed per-vein direction error that grows with distance; zero within the exact range. */
-    private static double blur(Veins.Located l, double dist, int range, int exactRange) {
+    /** Fixed per-spot direction error that grows with distance; zero within the exact range. */
+    private static double blur(int chunkX, int chunkZ, double dist, int range, int exactRange) {
         if (dist <= exactRange) return 0;
         double t = Math.min(1.0, dist / range);
-        Random r = new Random(l.chunkX() * 31L + l.chunkZ() * 17L);
+        Random r = new Random(chunkX * 31L + chunkZ * 17L);
         return (r.nextDouble() * 2 - 1) * t * Math.toRadians(60);
+    }
+
+    /**
+     * False echo chunks around the player: up to MAX_ECHOES_PER_CELL per vein cell, each kept with
+     * a fixed chance so that a cell has perCell echoes on average. Lower tiers keep more of the same
+     * echoes, so upgrading only removes echoes, it never moves them.
+     */
+    private static List<int[]> echoes(long seed, int chunkX, int chunkZ, int range, double perCell) {
+        List<int[]> out = new ArrayList<>();
+        if (perCell <= 0) return out;
+        double keep = perCell / MAX_ECHOES_PER_CELL;
+        for (int cx = Math.floorDiv(chunkX - range, Veins.CELL); cx <= Math.floorDiv(chunkX + range, Veins.CELL); cx++) {
+            for (int cz = Math.floorDiv(chunkZ - range, Veins.CELL); cz <= Math.floorDiv(chunkZ + range, Veins.CELL); cz++) {
+                Random r = new Random(seed ^ (cx * 73428767L) ^ (cz * 912931L) ^ 0xEC40EC40L);
+                for (int i = 0; i < MAX_ECHOES_PER_CELL; i++) {
+                    int x = cx * Veins.CELL + r.nextInt(Veins.CELL), z = cz * Veins.CELL + r.nextInt(Veins.CELL);
+                    if (r.nextDouble() < keep && Veins.at(seed, x, z) == null) out.add(new int[] {x, z});
+                }
+            }
+        }
+        return out;
     }
 
     private static String compass(double angle) {
