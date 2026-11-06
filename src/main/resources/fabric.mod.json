@@ -4,7 +4,7 @@
   "version": "${version}",
   "name": "Create: Ore Excavation Fly",
   "description": "Ore veins and drills for Create Fly. A port of Create: Ore Excavation by tom5454.",
-  "authors": ["Knito58"],
+  "authors": ["Claude AI", "Konitor"],
   "contributors": ["tom5454 (original Create: Ore Excavation)"],
   "contact": {
     "sources": "https://github.com/Knito58/Create-Ore-Excavation-Fly",
