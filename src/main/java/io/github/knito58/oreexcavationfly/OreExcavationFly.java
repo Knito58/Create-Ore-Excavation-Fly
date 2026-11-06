@@ -13,6 +13,8 @@ public class OreExcavationFly implements ModInitializer {
         Config.load();
         Veins.load();
         ModBlocks.register();
+        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.clientboundPlay().register(FinderReading.TYPE, FinderReading.CODEC);
+        net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(VeinFinderItem::tickHud);
         net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents
             .modifyOutputEvent(net.minecraft.world.item.CreativeModeTabs.FUNCTIONAL_BLOCKS)
             .register(tab -> {

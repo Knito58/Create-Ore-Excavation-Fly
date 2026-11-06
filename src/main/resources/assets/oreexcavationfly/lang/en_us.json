@@ -39,5 +39,5 @@
   "jei.oreexcavationfly.ore_header": "Can be drilled with the Ore Drill from:",
   "jei.oreexcavationfly.vein_line": "%s: one item every %s s at 32 RPM",
   "jei.oreexcavationfly.drill_info": "Place on the chunk of an ore vein with the shaft end (back) towards the power source. The front face is the output: put a chest, vault, barrel or belt there. Twice the speed means twice the ore. Find veins with the Ore Vein Finder.",
-  "jei.oreexcavationfly.finder_info": "Right-click to scan. Far away it only points in a rough direction. Closer, it names the vein type, and within a few chunks it gives the exact chunk. Stand in that chunk and place an Ore Drill."
+  "jei.oreexcavationfly.finder_info": "Hold it to see the radar in the top-left corner, or right-click to scan. Far away it only points in a rough direction. Closer, it names the vein type, and within a few chunks it gives the exact chunk. On the radar a far vein is a big faint pulse, a near one a sharp red dot; the inner rings mark the type and exact ranges. Stand in that chunk and place an Ore Drill."
 }
