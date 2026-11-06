@@ -1,6 +1,8 @@
 name: build
 on:
   push:
+    branches: ['**']
+    tags: ['v*']
   pull_request:
   workflow_dispatch:
 
@@ -19,12 +21,6 @@ jobs:
           distribution: temurin
           java-version: 25
       - uses: gradle/actions/setup-gradle@v4
-      - name: Probe Mod Menu and Cloth Config versions
-        run: |
-          curl -s https://maven.terraformersmc.com/releases/com/terraformersmc/modmenu/maven-metadata.xml | grep -E "<latest>|<release>|<version>2[0-9]\\." || true
-          echo "--- Jade (blamejared)"; curl -s https://maven.blamejared.com/snownee/jade/Jade-fabric/maven-metadata.xml | grep -E "<latest>|<release>|<version>" | tail -12 || true
-          echo "--- Jade (modrinth)"; curl -s https://api.modrinth.com/maven/maven/modrinth/jade/maven-metadata.xml | grep -E "<version>" | tail -12 || true
-          curl -s https://maven.shedaniel.me/me/shedaniel/cloth/cloth-config-fabric/maven-metadata.xml | grep -E "<latest>|<release>|<version>26\\." || true
       - name: Build Create Fly from source
         run: |
           git init /tmp/create-fly
@@ -45,3 +41,51 @@ jobs:
         with:
           name: create-ore-excavation-fly
           path: build/libs/*.jar
+
+  release:
+    # Runs only for tags like v1.0.0: publishes the built jar to CurseForge (release type: release) and GitHub.
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      CF_PROJECT_ID: '1786938'
+      CF_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: create-ore-excavation-fly
+          path: dist
+      - name: Pick the mod jar
+        run: |
+          JAR=$(ls dist/*.jar | grep -v -e sources -e dev | head -n1)
+          echo "JAR=$JAR" >> "$GITHUB_ENV"
+          ls -l dist
+      - name: Upload to CurseForge
+        run: |
+          set -euo pipefail
+          test -n "$CF_TOKEN" || { echo "Secret CURSEFORGE_TOKEN is missing"; exit 1; }
+          API=https://minecraft.curseforge.com/api
+          VERSIONS=$(curl -sSf -H "X-Api-Token: $CF_TOKEN" "$API/game/versions")
+          # Minecraft 26.3, the Fabric loader, and Java 25 when CurseForge lists it
+          IDS=$(echo "$VERSIONS" | jq -c '[.[] | select(.name=="26.3" or .name=="Fabric" or .name=="Java 25") | .id]')
+          echo "game version ids: $IDS"
+          echo "$VERSIONS" | jq -e '[.[] | select(.name=="26.3")] | length > 0' >/dev/null || { echo "CurseForge does not know Minecraft 26.3"; exit 1; }
+          echo "$VERSIONS" | jq -e '[.[] | select(.name=="Fabric")] | length > 0' >/dev/null || { echo "CurseForge does not know the Fabric loader"; exit 1; }
+          NAME="Create: Ore Excavation Fly ${GITHUB_REF_NAME#v}"
+          META=$(jq -nc --arg name "$NAME" --argjson ids "$IDS" '{
+            displayName: $name,
+            releaseType: "release",
+            changelogType: "markdown",
+            changelog: "First release.\n\n- Ore veins in every world, vein types as JSON files\n- Ore Drill: single block, outputs into the vault, barrel or chest in front of it\n- Ore Vein Finder: radar that gets more precise when you get closer\n- Optional: Mod Menu and Cloth Config, Jade, JEI",
+            gameVersions: $ids
+          }')
+          curl -sSf -H "X-Api-Token: $CF_TOKEN" \
+            -F "metadata=$META" -F "file=@$JAR" \
+            "$API/projects/$CF_PROJECT_ID/upload-file"
+      - name: GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "$JAR" --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" --notes "First release. Requires Create Fly (unofficial 26.3 port) and Fabric API."
