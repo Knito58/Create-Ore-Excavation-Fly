@@ -5,8 +5,14 @@ on:
     tags: ['v*']
   pull_request:
   workflow_dispatch:
+    inputs:
+      release:
+        description: 'Publish to CurseForge and GitHub (release type: release)'
+        type: boolean
+        default: false
 
 env:
+  RELEASE: ${{ inputs.release }}
   # Pinned commit of the unofficial Create Fly 26.3 port (the one the Villager Wake pack runs).
   # Pinned Create Fly commit. Bump deliberately when porting to a newer Create Fly.
   CREATE_FLY_REF: d28ff8220a3d2b83d433e41cc73eb0c81dad644f
@@ -43,8 +49,8 @@ jobs:
           path: build/libs/*.jar
 
   release:
-    # Runs only for tags like v1.0.0: publishes the built jar to CurseForge (release type: release) and GitHub.
-    if: startsWith(github.ref, 'refs/tags/v')
+    # Runs for tags like v1.0.0 or a manual run with release=true: publishes the built jar to CurseForge (release type: release) and GitHub.
+    if: startsWith(github.ref, 'refs/tags/v') || inputs.release
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -53,6 +59,7 @@ jobs:
       CF_PROJECT_ID: '1786938'
       CF_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           name: create-ore-excavation-fly
@@ -73,7 +80,9 @@ jobs:
           echo "game version ids: $IDS"
           echo "$VERSIONS" | jq -e '[.[] | select(.name=="26.3")] | length > 0' >/dev/null || { echo "CurseForge does not know Minecraft 26.3"; exit 1; }
           echo "$VERSIONS" | jq -e '[.[] | select(.name=="Fabric")] | length > 0' >/dev/null || { echo "CurseForge does not know the Fabric loader"; exit 1; }
-          NAME="Create: Ore Excavation Fly ${GITHUB_REF_NAME#v}"
+          VERSION=$(sed -n 's/^mod_version *= *//p' gradle.properties | tr -d ' \r')
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          NAME="Create: Ore Excavation Fly $VERSION"
           META=$(jq -nc --arg name "$NAME" --argjson ids "$IDS" '{
             displayName: $name,
             releaseType: "release",
@@ -88,4 +97,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" "$JAR" --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" --notes "First release. Requires Create Fly (unofficial 26.3 port) and Fabric API."
+          gh release create "v$VERSION" "$JAR" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "v$VERSION" --notes "First release. Requires Create Fly (unofficial 26.3 port) and Fabric API."
