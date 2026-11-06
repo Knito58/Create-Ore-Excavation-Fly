@@ -40,7 +40,9 @@ public class JeiIntegration implements IModPlugin {
         }
         registration.addItemStackInfo(new ItemStack(ModBlocks.DRILL),
             Component.translatable("jei.oreexcavationfly.drill_info"));
-        registration.addItemStackInfo(new ItemStack(ModBlocks.VEIN_FINDER),
-            Component.translatable("jei.oreexcavationfly.finder_info"));
+        for (Item finder : ModBlocks.FINDERS) {
+            registration.addItemStackInfo(new ItemStack(finder),
+                Component.translatable("jei.oreexcavationfly.finder_info"), Component.translatable("jei.oreexcavationfly.finder_tiers"));
+        }
     }
 }

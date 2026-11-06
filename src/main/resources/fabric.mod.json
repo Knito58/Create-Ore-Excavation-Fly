@@ -14,6 +14,7 @@
   "environment": "*",
   "entrypoints": {
     "main": ["io.github.knito58.oreexcavationfly.OreExcavationFly"],
+    "client": ["io.github.knito58.oreexcavationfly.FinderHud"],
     "modmenu": ["io.github.knito58.oreexcavationfly.ModMenuIntegration"],
     "jade": ["io.github.knito58.oreexcavationfly.JadeIntegration"],
     "jei_mod_plugin": ["io.github.knito58.oreexcavationfly.JeiIntegration"]
@@ -25,6 +26,7 @@
   },
   "depends": {
     "fabricloader": ">=0.19.5",
+    "fabric-api": "*",
     "minecraft": "26.3",
     "create": "*"
   }

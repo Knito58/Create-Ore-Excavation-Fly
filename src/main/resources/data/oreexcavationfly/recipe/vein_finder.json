@@ -1,11 +1,9 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "category": "misc",
-  "pattern": [" I ", "ICI", " R "],
-  "key": {
-    "I": "minecraft:iron_ingot",
-    "C": "minecraft:compass",
-    "R": "minecraft:redstone"
-  },
-  "result": { "id": "oreexcavationfly:vein_finder" }
+  "type": "minecraft:smithing_transform",
+  "template": "minecraft:redstone_torch",
+  "base": "oreexcavationfly:copper_vein_finder",
+  "addition": "minecraft:iron_block",
+  "result": {
+    "id": "oreexcavationfly:vein_finder"
+  }
 }
