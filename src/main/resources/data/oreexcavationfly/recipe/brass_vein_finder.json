@@ -1,6 +1,6 @@
 {
   "type": "minecraft:smithing_transform",
-  "template": "minecraft:redstone",
+  "template": "minecraft:redstone_torch",
   "base": "oreexcavationfly:vein_finder",
   "addition": "create:brass_block",
   "result": {

@@ -1,6 +1,6 @@
 {
   "type": "minecraft:smithing_transform",
-  "template": "minecraft:redstone",
+  "template": "minecraft:redstone_torch",
   "base": "oreexcavationfly:brass_vein_finder",
   "addition": "minecraft:diamond_block",
   "result": {
