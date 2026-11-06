@@ -36,6 +36,9 @@ public class ModMenuIntegration implements ModMenuApi {
                 .setDefaultValue(240).setMin(30).setMax(1200).setSaveConsumer(v -> c.finderSecondsPerCoal = v).build());
             finder.addEntry(e.startIntField(Component.translatable("config.oreexcavationfly.finderRadarRadius"), c.finderRadarRadius)
                 .setDefaultValue(64).setMin(24).setMax(160).setSaveConsumer(v -> c.finderRadarRadius = v).build());
+            ConfigCategory drill = b.getOrCreateCategory(Component.translatable("config.oreexcavationfly.drill"));
+            drill.addEntry(e.startDoubleField(Component.translatable("config.oreexcavationfly.drillStressImpact"), c.drillStressImpact)
+                .setDefaultValue(8.0).setMin(0).setMax(1024).setSaveConsumer(v -> c.drillStressImpact = v).build());
             return b.build();
         };
     }

@@ -36,6 +36,9 @@ public class FinderHud implements ClientModInitializer {
             last = reading;
             lastTime = System.currentTimeMillis();
         });
+        // Goggle tooltip with the drill's stress impact, same as Create's own kinetic blocks.
+        com.zurrtum.create.client.AllBlockEntityBehaviours.add(ModBlocks.DRILL_BE,
+            com.zurrtum.create.client.foundation.blockEntity.behaviour.tooltip.KineticTooltipBehaviour<DrillBlockEntity>::new);
         HudElementRegistry.addLast(Identifier.fromNamespaceAndPath(OreExcavationFly.MOD_ID, "finder_radar"), FinderHud::extract);
     }
 

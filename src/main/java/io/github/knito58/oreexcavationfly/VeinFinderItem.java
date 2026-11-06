@@ -150,6 +150,10 @@ public class VeinFinderItem extends Item {
         int exactRange = (int) Math.round(cfg.finderExactRangeChunks * RANGE_FACTOR[tier]);
         int pcx = player.blockPosition().getX() >> 4;
         int pcz = player.blockPosition().getZ() >> 4;
+        if (!Config.hasVeins(server)) {
+            return new FinderReading(tier, true, range, typeRange, exactRange,
+                Component.translatable("message.oreexcavationfly.finder.no_veins_here"), List.of());
+        }
 
         List<FinderReading.Dot> dots = new ArrayList<>();
         Veins.Located best = null;

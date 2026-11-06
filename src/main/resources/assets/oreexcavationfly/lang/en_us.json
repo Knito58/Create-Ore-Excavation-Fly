@@ -3,6 +3,7 @@
   "vein.oreexcavationfly.iron": "Iron Vein",
   "vein.oreexcavationfly.copper": "Copper Vein",
   "vein.oreexcavationfly.gold": "Gold Vein",
+  "vein.oreexcavationfly.zinc": "Zinc Vein",
   "vein.oreexcavationfly.coal": "Coal Vein",
   "vein.oreexcavationfly.redstone": "Redstone Vein",
   "vein.oreexcavationfly.lapis": "Lapis Vein",
@@ -46,5 +47,8 @@
   "jei.oreexcavationfly.finder_tiers": "Tiers: Copper (crafted) sees 12 chunks, is easily fooled by false echoes and flickers a lot. Iron sees 16 chunks, Brass 24 and Diamond 32; each aims better, shows fewer false echoes and flickers less. Diamond shows none and never flickers. Upgrade on the smithing table: redstone torch + finder + iron block, brass block or diamond block. The coal inside carries over.",
   "item.oreexcavationfly.copper_vein_finder": "Copper Ore Vein Finder",
   "item.oreexcavationfly.brass_vein_finder": "Brass Ore Vein Finder",
-  "config.oreexcavationfly.finderRadarRadius": "Radar size (radius in GUI pixels)"
+  "config.oreexcavationfly.finderRadarRadius": "Radar size (radius in GUI pixels)",
+  "message.oreexcavationfly.finder.no_veins_here": "No ore veins in this dimension",
+  "config.oreexcavationfly.drill": "Drill",
+  "config.oreexcavationfly.drillStressImpact": "Drill stress impact (SU per RPM)"
 }
