@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": ["III", "ICI", " S "],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "C": "create:andesite_casing",
+    "S": "create:shaft"
+  },
+  "result": { "id": "oreexcavationfly:drill" }
+}

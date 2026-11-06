@@ -13,10 +13,18 @@
   "license": "MIT",
   "environment": "*",
   "entrypoints": {
-    "main": ["io.github.knito58.oreexcavationfly.OreExcavationFly"]
+    "main": ["io.github.knito58.oreexcavationfly.OreExcavationFly"],
+    "modmenu": ["io.github.knito58.oreexcavationfly.ModMenuIntegration"],
+    "jade": ["io.github.knito58.oreexcavationfly.JadeIntegration"],
+    "jei_mod_plugin": ["io.github.knito58.oreexcavationfly.JeiIntegration"]
+  },
+  "suggests": {
+    "modmenu": "*",
+    "cloth-config": "*",
+    "jade": "*"
   },
   "depends": {
-    "fabricloader": ">=0.20.1",
+    "fabricloader": ">=0.19.5",
     "minecraft": "26.3",
     "create": "*"
   }

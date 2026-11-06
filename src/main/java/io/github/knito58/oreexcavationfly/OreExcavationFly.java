@@ -11,6 +11,14 @@ public class OreExcavationFly implements ModInitializer {
     @Override
     public void onInitialize() {
         Config.load();
-        LOGGER.info("Create: Ore Excavation Fly loaded");
+        Veins.load();
+        ModBlocks.register();
+        net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents
+            .modifyOutputEvent(net.minecraft.world.item.CreativeModeTabs.FUNCTIONAL_BLOCKS)
+            .register(tab -> {
+                tab.accept(ModBlocks.DRILL);
+                tab.accept(ModBlocks.VEIN_FINDER);
+            });
+        LOGGER.info("Create: Ore Excavation Fly {} loaded", net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(MOD_ID).map(c -> c.getMetadata().getVersion().getFriendlyString()).orElse("?"));
     }
 }
