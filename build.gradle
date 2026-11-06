@@ -4,7 +4,7 @@ plugins {
 
 // CI builds carry the run number so the exact jar can be told apart in Mod Menu and the log.
 def buildNumber = System.getenv("GITHUB_RUN_NUMBER")
-version = "${project.mod_version}+mc${project.minecraft_version}" + (System.getenv("GITHUB_REF_TYPE") == "tag" ? "" : (buildNumber ? ".build${buildNumber}" : ".local"))
+version = "${project.mod_version}+mc${project.minecraft_version}" + ((System.getenv("GITHUB_REF_TYPE") == "tag" || System.getenv("RELEASE") == "true") ? "" : (buildNumber ? ".build${buildNumber}" : ".local"))
 group = project.maven_group
 
 base {
