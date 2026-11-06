@@ -26,6 +26,8 @@ public class Config {
     public int finderExactRangeChunks = 3;
     /** Use cooldown in ticks. */
     public int finderCooldownTicks = 100;
+    /** Radar HUD radius in GUI pixels (client side). */
+    public int finderRadarRadius = 64;
     /** Seconds of scanning one coal or charcoal lasts. */
     public int finderSecondsPerCoal = 240;
 
@@ -34,6 +36,7 @@ public class Config {
         finderTypeRangeChunks = Math.max(1, Math.min(finderRangeChunks, finderTypeRangeChunks));
         finderExactRangeChunks = Math.max(0, Math.min(finderTypeRangeChunks, finderExactRangeChunks));
         finderCooldownTicks = Math.max(10, Math.min(1000, finderCooldownTicks));
+        finderRadarRadius = Math.max(24, Math.min(160, finderRadarRadius));
         finderSecondsPerCoal = Math.max(30, Math.min(1200, finderSecondsPerCoal));
     }
 

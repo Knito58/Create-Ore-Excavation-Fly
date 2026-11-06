@@ -18,7 +18,9 @@ import java.util.Random;
  * The inner rings mark the type and exact ranges. Copper, Iron and Brass finders flicker now and then.
  */
 public class FinderHud implements ClientModInitializer {
-    private static final int R = 32, MARGIN = 6;
+    private static final int MARGIN = 6;
+    /** Radar radius in GUI pixels, from the config (read every frame so changes show at once). */
+    private static int R = 64;
     private static final int BG = 0xC0001A00, RING = 0x2AD02A, DOT = 0x90FF90, TEXT = 0xFF90FF90;
     /** Sweep period in ms, and flicker pause range in seconds (0 = never), per tier. */
     private static final int[] SWEEP_MS = {4500, 4000, 3000, 2000};
@@ -44,6 +46,8 @@ public class FinderHud implements ClientModInitializer {
         long now = System.currentTimeMillis();
         if (player == null || r == null || mc.gui.hud.isHidden() || now - lastTime > 1500 || VeinFinderItem.held(player).isEmpty()) return;
 
+        R = Config.get().finderRadarRadius;
+        int big = R >= 48 ? 1 : 0; // larger dots on a larger radar
         int cx = MARGIN + R, cy = MARGIN + R;
         disc(g, cx, cy, R + 1, 0xFF0A0A0A);
         disc(g, cx, cy, R, BG);
@@ -76,16 +80,16 @@ public class FinderHud implements ClientModInitializer {
                 double since = Math.floorMod((long) ((sweep - Math.atan2(by - cy, bx - cx)) * 1000), (long) (2000 * Math.PI)) / (2000 * Math.PI);
                 double glow = 1.0 - 0.7 * since;
                 switch (d.sharp()) {
-                    case 0 -> disc(g, bx, by, 2, argb(DOT, 0.45 * glow));
-                    case 1 -> disc(g, bx, by, 1, argb(DOT, 0.85 * glow));
+                    case 0 -> disc(g, bx, by, 2 + big, argb(DOT, 0.45 * glow));
+                    case 1 -> disc(g, bx, by, 1 + big, argb(DOT, 0.85 * glow));
                     default -> {
-                        disc(g, bx, by, 1, argb(DOT, glow));
+                        disc(g, bx, by, 1 + big, argb(DOT, glow));
                         g.fill(bx, by, bx + 1, by + 1, 0xFFFFFFFF);
                     }
                 }
             }
         } else {
-            for (int i = 0; i < 160; i++) { // snow
+            for (int i = 0; i < R * R / 6; i++) { // snow
                 int x = RANDOM.nextInt(2 * R) - R, y = RANDOM.nextInt(2 * R) - R;
                 if (x * x + y * y < R * R) g.fill(cx + x, cy + y, cx + x + 1, cy + y + 1, argb(DOT, 0.3 + RANDOM.nextDouble() * 0.6));
             }

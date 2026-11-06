@@ -34,6 +34,8 @@ public class ModMenuIntegration implements ModMenuApi {
                 .setDefaultValue(100).setMin(10).setMax(1000).setSaveConsumer(v -> c.finderCooldownTicks = v).build());
             finder.addEntry(e.startIntField(Component.translatable("config.oreexcavationfly.finderSecondsPerCoal"), c.finderSecondsPerCoal)
                 .setDefaultValue(240).setMin(30).setMax(1200).setSaveConsumer(v -> c.finderSecondsPerCoal = v).build());
+            finder.addEntry(e.startIntField(Component.translatable("config.oreexcavationfly.finderRadarRadius"), c.finderRadarRadius)
+                .setDefaultValue(64).setMin(24).setMax(160).setSaveConsumer(v -> c.finderRadarRadius = v).build());
             return b.build();
         };
     }
