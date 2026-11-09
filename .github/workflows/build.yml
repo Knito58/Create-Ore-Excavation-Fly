@@ -88,7 +88,7 @@ jobs:
             displayName: $name,
             releaseType: "release",
             changelogType: "markdown",
-            changelog: "First release.\n\n- Ore veins in every world, vein types as JSON files\n- Ore Drill: single block, outputs into the vault, barrel or chest in front of it\n- Ore Vein Finder: radar that gets more precise when you get closer\n- Optional: Mod Menu and Cloth Config, Jade, JEI",
+            changelog: "Fix: the Ore Drill now drops itself when mined in survival. It can be mined with a pickaxe or axe of iron level or better.",
             gameVersions: $ids
           }')
           CODE=$(curl -sS -o response.txt -w '%{http_code}' -H "X-Api-Token: $CF_TOKEN" \
@@ -100,4 +100,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "v$VERSION" "$JAR" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "v$VERSION" --notes "First release. Requires Create Fly (unofficial 26.3 port) and Fabric API."
+          gh release create "v$VERSION" "$JAR" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "v$VERSION" --notes "Fix: the Ore Drill now drops itself when mined in survival (pickaxe or axe, iron level). Requires Create Fly (unofficial 26.3 port) and Fabric API."
